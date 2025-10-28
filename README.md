@@ -1,73 +1,95 @@
-# React + TypeScript + Vite
+# 🚗 Frontend - Sistema de Gestión de Almacén
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## ✅ **Archivos Creados**
 
-Currently, two official plugins are available:
+### **Configuración:**
+- ✅ `tailwind.config.js` - Configuración de Tailwind CSS
+- ✅ `postcss.config.js` - Configuración de PostCSS
+- ✅ `src/index.css` - Estilos globales con Tailwind
+- ✅ `src/types/index.ts` - Tipos TypeScript
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### **Servicios:**
+- ✅ `src/services/api.ts` - Servicio API para conectar con backend
 
-## React Compiler
+### **Layout:**
+- ✅ `src/components/Layout/index.tsx` - Layout principal
+- ✅ `src/components/Layout/Header.tsx` - Header con navegación
+- ✅ `src/components/Layout/Sidebar.tsx` - Sidebar con menú
+- ✅ `src/components/Layout/Footer.tsx` - Footer
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### **Páginas:**
+- ✅ `src/pages/Login.tsx` - Página de inicio de sesión
+- ✅ `src/pages/Dashboard.tsx` - Dashboard principal
+- ✅ `src/pages/Products.tsx` - Lista de productos
+- ✅ `src/pages/Suppliers.tsx` - Lista de proveedores
+- ✅ `src/pages/Quotes.tsx` - Lista de cotizaciones
+- ✅ `src/pages/Sales.tsx` - Lista de ventas
 
-## Expanding the ESLint configuration
+### **Configuración:**
+- ✅ `src/App.tsx` - Configuración de rutas
+- ✅ `src/main.tsx` - Entry point
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 **Cómo Usar**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### **1. Crear archivo .env:**
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Crea un archivo `.env` en la raíz de `gestionfront`:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_API_URL=http://localhost:4001/api
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### **2. Iniciar el servidor de desarrollo:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd gestionfront
+npm run dev
 ```
+
+El frontend estará disponible en: `http://localhost:5173`
+
+### **3. Asegúrate de que el backend esté corriendo:**
+
+```bash
+cd gestion-de-almacen
+pnpm run start:dev
+```
+
+Backend: `http://localhost:4001`
+
+## 📋 **Rutas Disponibles**
+
+- `/login` - Inicio de sesión
+- `/` - Dashboard
+- `/products` - Productos
+- `/suppliers` - Proveedores
+- `/quotes` - Cotizaciones
+- `/sales` - Ventas
+
+## 🎨 **Características**
+
+- ✅ Diseño responsive con Tailwind CSS
+- ✅ Conexión automática con backend
+- ✅ Autenticación JWT
+- ✅ Tablas con búsqueda
+- ✅ Navegación con menú lateral
+- ✅ Estadísticas en Dashboard
+- ✅ Indicadores de estado (Stock bajo, etc.)
+
+## 🔗 **Conexión con Backend**
+
+El frontend se conecta automáticamente a tu backend en:
+- URL Base: `http://localhost:4001/api`
+- Autenticación: JWT Bearer Token
+- Headers: Automático
+
+## 📝 **Próximos Pasos**
+
+Para agregar funcionalidad:
+1. Crear formularios de creación/edición
+2. Agregar modales de confirmación
+3. Implementar paginación
+4. Agregar gráficas en Dashboard
+5. Mejorar UX con loading states
+
+¡Listo para probar! 🎉
