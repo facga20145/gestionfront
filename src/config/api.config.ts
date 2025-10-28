@@ -4,5 +4,3 @@ export const API_CONFIG = {
   timeout: 10000,
 };
 
-console.log('🔧 API Config:', API_CONFIG);
-

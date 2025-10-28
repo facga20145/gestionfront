@@ -13,7 +13,7 @@ const api = axios.create({
 
 // Interceptor para agregar el token JWT a todas las peticiones
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -44,14 +44,26 @@ export const usersService = {
 
 // ==================== AUTH ====================
 export const authService = {
-  login: async (email: string, password: string) => {
-    console.log('🔄 Login request:', { email, url: `${API_URL}/auth/login` });
+  // Verificar si el token es válido
+  verifyToken: async () => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      console.log('✅ Login response:', response.data);
-      if (response.data.data?.access_token) {
-        localStorage.setItem('token', response.data.data.access_token);
+      const response = await api.get('/auth/verify');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  
+  login: async (username: string, password: string) => {
+    try {
+      const response = await api.post('/auth/login', { username, password });
+      
+      // El backend envuelve con { statusCode, message, data }
+      // Y el access_token está en response.data.data.access_token
+      if (response.data?.data?.access_token) {
+        sessionStorage.setItem('token', response.data.data.access_token);
       }
+      
       return response.data;
     } catch (error) {
       console.error('❌ Login error:', error);
@@ -60,10 +72,8 @@ export const authService = {
   },
   
   register: async (data: any) => {
-    console.log('🔄 Register request:', data, { url: `${API_URL}/auth/register` });
     try {
       const response = await api.post('/auth/register', data);
-      console.log('✅ Register response:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Register error:', error);
@@ -101,6 +111,7 @@ export const productsService = {
 export const suppliersService = {
   getAll: async () => {
     const response = await api.get('/suppliers');
+    console.log('🔍 Suppliers API Response:', response.data);
     return response.data;
   },
   

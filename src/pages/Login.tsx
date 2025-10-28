@@ -31,14 +31,16 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await authService.login(email, password);
-      console.log('Login response:', response);
-      if (response.status_code === 200 || response.access_token) {
-        if (response.data?.access_token || response.access_token) {
-          localStorage.setItem('token', response.data?.access_token || response.access_token);
-          setToast({ message: '¡Inicio de sesión exitoso!', type: 'success' });
-          setTimeout(() => navigate('/'), 1000);
-        }
+      const response = await authService.login(email || registerEmail, password);
+      console.log('Login response en componente:', response);
+      
+      // El token ya está guardado por el servicio API
+      // Solo verificar si el login fue exitoso
+      if (response.statusCode === 200 || response.data?.access_token) {
+        setToast({ message: '¡Inicio de sesión exitoso!', type: 'success' });
+        setTimeout(() => window.location.href = '/', 1000);
+      } else {
+        setToast({ message: 'No se recibió token de autenticación', type: 'error' });
       }
     } catch (err: any) {
       console.error('Login error:', err);

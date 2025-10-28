@@ -6,27 +6,20 @@ import Suppliers from './pages/Suppliers';
 import Quotes from './pages/Quotes';
 import Sales from './pages/Sales';
 import Login from './pages/Login';
+import AuthGuard from './guards/AuthGuard';
 import './App.css';
 
 function App() {
-  // Verificar si el usuario está autenticado
-  const isAuthenticated = !!localStorage.getItem('token');
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route 
-          path="/login" 
-          element={isAuthenticated ? <Navigate to="/" /> : <Login />} 
-        />
+        <Route path="/login" element={<Login />} />
         <Route 
           path="/" 
           element={
-            isAuthenticated ? (
+            <AuthGuard>
               <Layout />
-            ) : (
-              <Navigate to="/login" />
-            )
+            </AuthGuard>
           }
         >
           <Route index element={<Dashboard />} />

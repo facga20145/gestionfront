@@ -12,10 +12,20 @@ export default function Sales() {
   const loadSales = async () => {
     try {
       const response = await salesService.getAll();
-      console.log('Sales response:', response);
-      setSales(response.data?.data || response.data || []);
+      
+      // Asegurarse de que siempre sea un array
+      const salesList = Array.isArray(response.data?.data)
+        ? response.data.data
+        : Array.isArray(response.data)
+        ? response.data
+        : Array.isArray(response)
+        ? response
+        : [];
+        
+      setSales(salesList);
     } catch (error) {
       console.error('Error loading sales:', error);
+      setSales([]); // Asegurar que sea array vacío en caso de error
     }
   };
 

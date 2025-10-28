@@ -13,11 +13,20 @@ export default function Quotes() {
   const loadQuotes = async () => {
     try {
       const response = await quotesService.getAll();
-      console.log('Quotes response:', response);
-      // El backend devuelve data.data con las cotizaciones
-      setQuotes(response.data?.data || response.data || []);
+      
+      // Asegurarse de que siempre sea un array
+      const quotesList = Array.isArray(response.data?.data)
+        ? response.data.data
+        : Array.isArray(response.data)
+        ? response.data
+        : Array.isArray(response)
+        ? response
+        : [];
+        
+      setQuotes(quotesList);
     } catch (error) {
       console.error('Error loading quotes:', error);
+      setQuotes([]); // Asegurar que sea array vacío en caso de error
     }
   };
 
