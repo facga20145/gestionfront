@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { salesService } from '../services/api';
 import type { Sale } from '../types';
+import CreateSaleModal from '../components/CreateSaleModal';
 
 export default function Sales() {
   const [sales, setSales] = useState<Sale[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadSales();
@@ -12,16 +14,16 @@ export default function Sales() {
   const loadSales = async () => {
     try {
       const response = await salesService.getAll();
-      
+
       // Asegurarse de que siempre sea un array
       const salesList = Array.isArray(response.data?.data)
         ? response.data.data
         : Array.isArray(response.data)
-        ? response.data
-        : Array.isArray(response)
-        ? response
-        : [];
-        
+          ? response.data
+          : Array.isArray(response)
+            ? response
+            : [];
+
       setSales(salesList);
     } catch (error) {
       console.error('Error loading sales:', error);
@@ -43,7 +45,10 @@ export default function Sales() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">Ventas</h2>
-        <button className="btn-primary">
+        <button
+          className="btn-primary"
+          onClick={() => setIsModalOpen(true)}
+        >
           + Nueva Venta
         </button>
       </div>
@@ -86,6 +91,12 @@ export default function Sales() {
       <div className="mt-4 text-gray-600">
         Total de ventas: {sales.length}
       </div>
+
+      <CreateSaleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={loadSales}
+      />
     </div>
   );
 }

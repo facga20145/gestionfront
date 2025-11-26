@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { quotesService } from '../services/api';
 import type { Quote } from '../types';
+import CreateQuoteModal from '../components/CreateQuoteModal';
 
 export default function Quotes() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [search, setSearch] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     loadQuotes();
@@ -13,20 +15,41 @@ export default function Quotes() {
   const loadQuotes = async () => {
     try {
       const response = await quotesService.getAll();
-      
+
       // Asegurarse de que siempre sea un array
       const quotesList = Array.isArray(response.data?.data)
         ? response.data.data
         : Array.isArray(response.data)
-        ? response.data
-        : Array.isArray(response)
-        ? response
-        : [];
-        
+          ? response.data
+          : Array.isArray(response)
+            ? response
+            : [];
+
       setQuotes(quotesList);
     } catch (error) {
       console.error('Error loading quotes:', error);
       setQuotes([]); // Asegurar que sea array vacío en caso de error
+    }
+  };
+
+  const handleSendEmail = async (quote: Quote) => {
+    if (!confirm(`¿Enviar cotización ${quote.codigo} a ${quote.clienteEmail}?`)) return;
+
+    try {
+      await quotesService.sendEmail({
+        emailDestino: quote.clienteEmail,
+        codigo: quote.codigo,
+        clienteNombre: quote.clienteNombre,
+        fecha: quote.fecha,
+        vendedorNombre: 'Vendedor', // TODO: Obtener del usuario actual
+        items: quote.items,
+        total: quote.total
+      });
+      alert('Email enviado correctamente');
+      loadQuotes(); // Recargar para actualizar estado si cambia
+    } catch (error) {
+      console.error('Error sending email:', error);
+      alert('Error al enviar el email');
     }
   };
 
@@ -44,7 +67,10 @@ export default function Quotes() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">Cotizaciones</h2>
-        <button className="btn-primary">
+        <button
+          className="btn-primary"
+          onClick={() => setIsModalOpen(true)}
+        >
           + Nueva Cotización
         </button>
       </div>
@@ -75,7 +101,10 @@ export default function Quotes() {
             {quotes.map((quote) => (
               <tr key={quote.id} className="border-b">
                 <td className="px-4 py-3 font-bold">{quote.codigo}</td>
-                <td className="px-4 py-3">{quote.clienteNombre}</td>
+                <td className="px-4 py-3">
+                  <div>{quote.clienteNombre}</div>
+                  <div className="text-xs text-gray-500">{quote.clienteEmail}</div>
+                </td>
                 <td className="px-4 py-3">{new Date(quote.fecha).toLocaleDateString()}</td>
                 <td className="px-4 py-3 font-bold">${quote.total}</td>
                 <td className="px-4 py-3">
@@ -85,7 +114,12 @@ export default function Quotes() {
                 </td>
                 <td className="px-4 py-3">
                   <button className="text-blue-600 hover:underline mr-3">Ver</button>
-                  <button className="text-green-600 hover:underline mr-3">Enviar Email</button>
+                  <button
+                    className="text-green-600 hover:underline mr-3"
+                    onClick={() => handleSendEmail(quote)}
+                  >
+                    Enviar Email
+                  </button>
                 </td>
               </tr>
             ))}
@@ -102,6 +136,12 @@ export default function Quotes() {
       <div className="mt-4 text-gray-600">
         Total de cotizaciones: {quotes.length}
       </div>
+
+      <CreateQuoteModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={loadQuotes}
+      />
     </div>
   );
 }
