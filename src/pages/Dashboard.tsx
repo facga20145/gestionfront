@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { productsService, salesService, quotesService } from '../services/api';
+import { Boxes, DollarSign, ClipboardList, Truck, TrendingUp, PieChart } from 'lucide-react';
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -84,16 +85,6 @@ export default function Dashboard() {
     return colors[estado] || 'bg-gray-100 text-gray-800';
   };
 
-  const getStatusDot = (estado: string) => {
-    const dots: any = {
-      'Enviado': '🟢',
-      'En Proceso': '🟠',
-      'Entregado': '🟢',
-      'Pendiente': '🔴',
-    };
-    return dots[estado] || '⚪';
-  };
-
   return (
     <div className="space-y-6">
       {/* Header con filtros */}
@@ -118,7 +109,7 @@ export default function Dashboard() {
               <p className="text-4xl font-bold text-gray-800">{stats.totalPiezas.toLocaleString()}</p>
             </div>
             <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center">
-              <span className="text-3xl">📦</span>
+              <Boxes className="w-8 h-8 text-blue-700" />
             </div>
           </div>
         </div>
@@ -130,7 +121,7 @@ export default function Dashboard() {
               <p className="text-4xl font-bold text-gray-800">${stats.valorInventario.toLocaleString()}</p>
             </div>
             <div className="w-16 h-16 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-3xl">💰</span>
+              <DollarSign className="w-8 h-8 text-green-700" />
             </div>
           </div>
         </div>
@@ -142,7 +133,7 @@ export default function Dashboard() {
               <p className="text-4xl font-bold text-gray-800">{stats.pedidosProcesar}</p>
             </div>
             <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <span className="text-3xl">📋</span>
+              <ClipboardList className="w-8 h-8 text-yellow-700" />
             </div>
           </div>
         </div>
@@ -154,7 +145,7 @@ export default function Dashboard() {
               <p className="text-4xl font-bold text-gray-800">{stats.enviosHoy}</p>
             </div>
             <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center">
-              <span className="text-3xl">🚚</span>
+              <Truck className="w-8 h-8 text-purple-700" />
             </div>
           </div>
         </div>
@@ -166,27 +157,35 @@ export default function Dashboard() {
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-bold text-gray-800">Tendencia de Inventario</h3>
-            <span className="text-green-600 font-semibold">↑ 1.8%</span>
+            <span className="inline-flex items-center gap-1 text-green-600 font-semibold text-sm">
+              <TrendingUp className="w-4 h-4" />  Últimos 30 días
+            </span>
           </div>
-          <p className="text-sm text-gray-600 mb-4">Últimos 30 días</p>
-          <div className="h-48 bg-gradient-to-t from-blue-50 to-white rounded-lg flex items-end justify-center">
-            <div className="text-center text-gray-500 py-4">
-              <p className="text-xl">📈</p>
-              <p className="text-sm">Gráfica de tendencia</p>
-            </div>
+          <div className="h-48 bg-gradient-to-t from-blue-50 to-white rounded-lg px-4 py-3 flex items-end gap-2">
+            {[0.4, 0.6, 0.5, 0.7, 0.9, 1].map((value, idx) => (
+              <div
+                key={idx}
+                className="flex-1 bg-blue-500 rounded-t-md"
+                style={{ height: `${value * 100}%`, opacity: 0.5 + value * 0.4 }}
+              />
+            ))}
           </div>
         </div>
 
         {/* Stock por Categoría */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Stock por Categoría</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-gray-800">Stock por Categoría</h3>
+            <PieChart className="w-5 h-5 text-gray-500" />
+          </div>
           <div className="flex items-center justify-center h-48">
-            <div className="relative w-48 h-48">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-800">4.5k</p>
-                  <p className="text-sm text-gray-600">Unidades</p>
-                </div>
+            <div className="relative w-40 h-40">
+              <div className="absolute inset-0 rounded-full border-8 border-blue-500 border-r-green-500 border-b-yellow-500 border-l-gray-300" />
+              <div className="absolute inset-4 rounded-full bg-white flex flex-col items-center justify-center">
+                <p className="text-xl font-bold text-gray-800">
+                  {stats.totalPiezas.toLocaleString()}
+                </p>
+                <p className="text-xs text-gray-500">Piezas</p>
               </div>
             </div>
           </div>
@@ -194,26 +193,30 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                <span className="text-sm text-gray-700">Motores (40%)</span>
+                <span className="text-sm text-gray-700">Motores</span>
               </div>
+              <span className="text-sm text-gray-600">40%</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-green-600 rounded-full"></div>
-                <span className="text-sm text-gray-700">Frenos (30%)</span>
+                <span className="text-sm text-gray-700">Frenos</span>
               </div>
+              <span className="text-sm text-gray-600">30%</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-yellow-600 rounded-full"></div>
-                <span className="text-sm text-gray-700">Suspensión (20%)</span>
+                <span className="text-sm text-gray-700">Suspensión</span>
               </div>
+              <span className="text-sm text-gray-600">20%</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                <span className="text-sm text-gray-700">Otros (10%)</span>
+                <span className="text-sm text-gray-700">Otros</span>
               </div>
+              <span className="text-sm text-gray-600">10%</span>
             </div>
           </div>
         </div>
@@ -248,7 +251,7 @@ export default function Dashboard() {
                   <td className="px-4 py-3 text-sm text-gray-700">{activity.fecha}</td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(activity.estado)}`}>
-                      {getStatusDot(activity.estado)} {activity.estado}
+                      <span className="w-2 h-2 rounded-full bg-current" /> {activity.estado}
                     </span>
                   </td>
                   <td className="px-4 py-3">

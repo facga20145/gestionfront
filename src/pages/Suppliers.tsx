@@ -3,12 +3,15 @@ import { suppliersService } from '../services/api';
 import type { Supplier } from '../types';
 import Toast from '../components/Toast';
 import { extractData } from '../utils/api-helper';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { Plus, Search, Edit2, Trash2, Building2, Phone, Mail, MapPin } from 'lucide-react';
 
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [formData, setFormData] = useState({
@@ -25,12 +28,15 @@ export default function Suppliers() {
 
   const loadSuppliers = async () => {
     try {
+      setIsLoading(true);
       const response = await suppliersService.getAll();
       const suppliersList = extractData<Supplier>(response);
       setSuppliers(suppliersList);
     } catch (error) {
       console.error('Error loading suppliers:', error);
       setSuppliers([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -80,9 +86,7 @@ export default function Suppliers() {
 
       handleCloseModal();
       setSearch('');
-      setTimeout(() => {
-        loadSuppliers();
-      }, 600);
+      loadSuppliers(); // Llamar inmediatamente sin delay
       setFormData({ nombre: '', telefono: '', email: '', direccion: '' });
       setEditingSupplier(null);
     } catch (error) {
@@ -107,14 +111,14 @@ export default function Suppliers() {
           onClick={() => setShowModal(true)}
           className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 font-medium"
         >
-          <span className="text-xl">+</span> Nuevo Proveedor
+          <Plus className="w-5 h-5" /> Nuevo Proveedor
         </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
         <div className="p-6 border-b border-gray-100 bg-gray-50/50">
           <div className="relative max-w-md">
-            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Buscar por nombre, email..."
@@ -126,71 +130,77 @@ export default function Suppliers() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider font-semibold">
-              <tr>
-                <th className="px-6 py-4 text-left">Proveedor</th>
-                <th className="px-6 py-4 text-left">Contacto</th>
-                <th className="px-6 py-4 text-left">Dirección</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredSuppliers.map((supplier) => (
-                <tr key={supplier.id} className="hover:bg-green-50/30 transition-colors duration-200 group">
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-gray-800">{supplier.nombre}</span>
-                      <span className="text-xs text-gray-500 mt-0.5">ID: {supplier.id}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col gap-1">
-                      {supplier.email && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span>📧</span> {supplier.email}
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              <table className="w-full">
+                <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="px-6 py-4 text-left">Proveedor</th>
+                    <th className="px-6 py-4 text-left">Contacto</th>
+                    <th className="px-6 py-4 text-left">Dirección</th>
+                    <th className="px-6 py-4 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredSuppliers.map((supplier) => (
+                    <tr key={supplier.id} className="hover:bg-green-50/30 transition-colors duration-200 group">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-gray-800">{supplier.nombre}</span>
+                          <span className="text-xs text-gray-500 mt-0.5">ID: {supplier.id}</span>
                         </div>
-                      )}
-                      {supplier.telefono && (
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <span>📞</span> {supplier.telefono}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-1">
+                          {supplier.email && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Mail className="w-4 h-4" /> {supplier.email}
+                            </div>
+                          )}
+                          {supplier.telefono && (
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Phone className="w-4 h-4" /> {supplier.telefono}
+                            </div>
+                          )}
+                          {!supplier.email && !supplier.telefono && <span className="text-gray-400 text-sm">-</span>}
                         </div>
-                      )}
-                      {!supplier.email && !supplier.telefono && <span className="text-gray-400 text-sm">-</span>}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 text-sm">
-                    {supplier.direccion || '-'}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <button
-                        onClick={() => handleOpenEdit(supplier)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Editar"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDelete(supplier.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Eliminar"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600 text-sm">
+                        {supplier.direccion || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button
+                            onClick={() => handleOpenEdit(supplier)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Editar"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(supplier.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-          {filteredSuppliers.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🏢</div>
-              <h3 className="text-lg font-medium text-gray-900">No se encontraron proveedores</h3>
-              <p className="text-gray-500 mt-1">Intenta con otra búsqueda o agrega un nuevo proveedor.</p>
-            </div>
+              {filteredSuppliers.length === 0 && !isLoading && (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🏢</div>
+                  <h3 className="text-lg font-medium text-gray-900">No se encontraron proveedores</h3>
+                  <p className="text-gray-500 mt-1">Intenta con otra búsqueda o agrega un nuevo proveedor.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -212,16 +222,17 @@ export default function Suppliers() {
           <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
             <div
               className={`pointer-events-auto w-full max-w-2xl max-h-[90vh] transition-all duration-300 ${isClosing
-                  ? 'opacity-0 transform scale-95 translate-y-4'
-                  : 'opacity-100 transform scale-100 translate-y-0'
+                ? 'opacity-0 transform scale-95 translate-y-4'
+                : 'opacity-100 transform scale-100 translate-y-0'
                 }`}
             >
               <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
                 {/* Header */}
                 <div className="bg-gradient-to-r from-green-600 to-green-700 text-white p-6 rounded-t-xl flex justify-between items-center">
                   <div>
-                    <h3 className="text-2xl font-bold">
-                      {editingSupplier ? '✏️ Editar Proveedor' : '🏢 Nuevo Proveedor'}
+                    <h3 className="text-2xl font-bold flex items-center gap-2">
+                      {editingSupplier ? <Edit2 className="w-6 h-6" /> : <Building2 className="w-6 h-6" />}
+                      {editingSupplier ? 'Editar Proveedor' : 'Nuevo Proveedor'}
                     </h3>
                     <p className="text-green-100 text-sm mt-1">
                       {editingSupplier ? 'Modificar información del proveedor' : 'Agregar un nuevo proveedor al sistema'}
@@ -240,8 +251,8 @@ export default function Suppliers() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Nombre */}
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        🏢 Nombre del Proveedor *
+                      <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <Building2 className="w-4 h-4" /> Nombre del Proveedor *
                       </label>
                       <input
                         type="text"
@@ -255,8 +266,8 @@ export default function Suppliers() {
 
                     {/* Teléfono */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        📞 Teléfono
+                      <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <Phone className="w-4 h-4" /> Teléfono
                       </label>
                       <input
                         type="tel"
@@ -269,8 +280,8 @@ export default function Suppliers() {
 
                     {/* Email */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        📧 Email
+                      <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <Mail className="w-4 h-4" /> Email
                       </label>
                       <input
                         type="email"
@@ -283,8 +294,8 @@ export default function Suppliers() {
 
                     {/* Dirección */}
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        📍 Dirección
+                      <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                        <MapPin className="w-4 h-4" /> Dirección
                       </label>
                       <input
                         type="text"

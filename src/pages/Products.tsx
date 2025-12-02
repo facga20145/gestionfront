@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { productsService, suppliersService } from '../services/api';
 import type { Product, Supplier } from '../types';
 import { extractData } from '../utils/api-helper';
+import LoadingSpinner from '../components/LoadingSpinner';
+import { Plus, Search, Edit2, Trash2 } from 'lucide-react';
 
 export default function Products() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -9,6 +11,7 @@ export default function Products() {
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const [formData, setFormData] = useState({
@@ -47,12 +50,15 @@ export default function Products() {
 
   const loadProducts = async () => {
     try {
+      setIsLoading(true);
       const response = await productsService.getAll();
       const productsList = extractData<Product>(response);
       setProducts(productsList);
     } catch (error) {
       console.error('Error loading products:', error);
       setProducts([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -129,14 +135,14 @@ export default function Products() {
           onClick={() => setShowModal(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2 font-medium"
         >
-          <span className="text-xl">+</span> Nuevo Producto
+          <Plus className="w-5 h-5" /> Nuevo Producto
         </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
         <div className="p-6 border-b border-gray-100 bg-gray-50/50">
           <div className="relative max-w-md">
-            <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               placeholder="Buscar por nombre, categoría..."
@@ -148,78 +154,84 @@ export default function Products() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider font-semibold">
-              <tr>
-                <th className="px-6 py-4 text-left">Producto</th>
-                <th className="px-6 py-4 text-left">Precio</th>
-                <th className="px-6 py-4 text-left">Stock</th>
-                <th className="px-6 py-4 text-left">Categoría</th>
-                <th className="px-6 py-4 text-left">Proveedor</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-blue-50/30 transition-colors duration-200 group">
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col">
-                      <span className="font-semibold text-gray-800">{product.nombre}</span>
-                      {product.descripcion && (
-                        <span className="text-xs text-gray-500 mt-0.5 truncate max-w-xs">{product.descripcion}</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-md">
-                      ${product.precio.toFixed(2)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2.5 h-2.5 rounded-full ${product.stock < 10 ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}></span>
-                      <span className={`font-medium ${product.stock < 10 ? 'text-red-600' : 'text-gray-700'}`}>
-                        {product.stock} u.
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {product.categoria || 'General'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600 text-sm">
-                    {product.proveedor?.nombre || '-'}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <button
-                        onClick={() => handleEdit(product)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Editar"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDelete(product.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Eliminar"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {isLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              <table className="w-full">
+                <thead className="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="px-6 py-4 text-left">Producto</th>
+                    <th className="px-6 py-4 text-left">Precio</th>
+                    <th className="px-6 py-4 text-left">Stock</th>
+                    <th className="px-6 py-4 text-left">Categoría</th>
+                    <th className="px-6 py-4 text-left">Proveedor</th>
+                    <th className="px-6 py-4 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredProducts.map((product) => (
+                    <tr key={product.id} className="hover:bg-blue-50/30 transition-colors duration-200 group">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-gray-800">{product.nombre}</span>
+                          {product.descripcion && (
+                            <span className="text-xs text-gray-500 mt-0.5 truncate max-w-xs">{product.descripcion}</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-md">
+                          ${product.precio.toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2.5 h-2.5 rounded-full ${product.stock < 10 ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`}></span>
+                          <span className={`font-medium ${product.stock < 10 ? 'text-red-600' : 'text-gray-700'}`}>
+                            {product.stock} u.
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {product.categoria || 'General'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600 text-sm">
+                        {product.proveedor?.nombre || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Editar"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(product.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="Eliminar"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-          {filteredProducts.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📦</div>
-              <h3 className="text-lg font-medium text-gray-900">No se encontraron productos</h3>
-              <p className="text-gray-500 mt-1">Intenta con otra búsqueda o agrega un nuevo producto.</p>
-            </div>
+              {filteredProducts.length === 0 && !isLoading && (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">📦</div>
+                  <h3 className="text-lg font-medium text-gray-900">No se encontraron productos</h3>
+                  <p className="text-gray-500 mt-1">Intenta con otra búsqueda o agrega un nuevo producto.</p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -241,8 +253,8 @@ export default function Products() {
           <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
             <div
               className={`pointer-events-auto w-full max-w-2xl bg-white rounded-2xl shadow-2xl transform transition-all duration-300 overflow-hidden ${isClosing
-                  ? 'opacity-0 scale-95 translate-y-4'
-                  : 'opacity-100 scale-100 translate-y-0'
+                ? 'opacity-0 scale-95 translate-y-4'
+                : 'opacity-100 scale-100 translate-y-0'
                 }`}
             >
               <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white flex justify-between items-start">

@@ -157,8 +157,9 @@ export const quotesService = {
     return await api.delete(`/quotes/${id}`);
   },
   
-  sendEmail: async (data: any) => {
-    return await api.post('/quotes/send-email', data);
+  // Enviar email de una cotización por ID
+  sendEmail: async (id: number) => {
+    return await api.post(`/quotes/${id}/send-email`, {});
   },
 };
 

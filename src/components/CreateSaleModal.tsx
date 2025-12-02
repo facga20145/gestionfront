@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { productsService, salesService } from '../services/api';
 import type { Product } from '../types';
+import { extractData } from '../utils/api-helper';
 
 interface CreateSaleModalProps {
     isOpen: boolean;
@@ -29,10 +30,11 @@ export default function CreateSaleModal({ isOpen, onClose, onSuccess }: CreateSa
     const loadProducts = async () => {
         try {
             const response = await productsService.getAll();
-            const list = Array.isArray(response.data) ? response.data : [];
+            const list = extractData<Product>(response);
             setProducts(list);
         } catch (error) {
             console.error('Error loading products:', error);
+            setProducts([]);
         }
     };
 

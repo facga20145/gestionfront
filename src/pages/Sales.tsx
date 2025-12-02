@@ -32,11 +32,11 @@ export default function Sales() {
   };
 
   const getPaymentMethod = (method: string) => {
-    const methods: any = {
-      EFECTIVO: '💵 Efectivo',
-      TRANSFERENCIA: '🏦 Transferencia',
-      TARJETA: '💳 Tarjeta',
-      CREDITO: '📝 Crédito',
+    const methods: Record<string, string> = {
+      EFECTIVO: 'Efectivo',
+      TRANSFERENCIA: 'Transferencia',
+      TARJETA: 'Tarjeta',
+      CREDITO: 'Crédito',
     };
     return methods[method] || method;
   };
