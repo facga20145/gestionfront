@@ -18,6 +18,7 @@ export default function CreateQuoteModal({ isOpen, onClose, onSuccess }: CreateQ
   });
   const [selectedProduct, setSelectedProduct] = useState('');
   const [quantity, setQuantity] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -67,8 +68,10 @@ export default function CreateQuoteModal({ isOpen, onClose, onSuccess }: CreateQ
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
-      await quotesService.create({
+      console.log('📤 Creando cotización...', formData);
+      const response = await quotesService.create({
         clienteNombre: formData.clienteNombre,
         clienteEmail: formData.clienteEmail,
         items: formData.items.map(({ productId, cantidad, precioUnitario }) => ({
@@ -77,13 +80,17 @@ export default function CreateQuoteModal({ isOpen, onClose, onSuccess }: CreateQ
           precioUnitario
         }))
       });
+      console.log('✅ Cotización creada:', response);
       onSuccess();
       onClose();
       setFormData({ clienteNombre: '', clienteEmail: '', items: [] });
-      alert('Cotización creada exitosamente');
-    } catch (error) {
-      console.error('Error creating quote:', error);
-      alert('Error al crear la cotización');
+      alert('✅ Cotización creada exitosamente. El correo se está enviando...');
+    } catch (error: any) {
+      console.error('❌ Error creating quote:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error desconocido';
+      alert(`❌ Error al crear la cotización: ${errorMessage}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -241,10 +248,17 @@ export default function CreateQuoteModal({ isOpen, onClose, onSuccess }: CreateQ
               </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={formData.items.length === 0 || !formData.clienteNombre || !formData.clienteEmail}
+                className="px-6 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 shadow-lg hover:shadow-indigo-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                disabled={formData.items.length === 0 || !formData.clienteNombre || !formData.clienteEmail || isSubmitting}
               >
-                Crear Cotización
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Creando...</span>
+                  </>
+                ) : (
+                  'Crear Cotización'
+                )}
               </button>
             </div>
           </form>

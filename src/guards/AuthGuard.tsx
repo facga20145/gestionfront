@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_CONFIG } from '../config/api.config';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -25,7 +26,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
     // Validar token con el backend
     try {
-      const response = await fetch('http://localhost:4001/api/products?limit=1', {
+      const response = await fetch(`${API_CONFIG.baseURL}/products?limit=1`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
